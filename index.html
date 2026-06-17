@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wagon Operations Console</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #000000;       /* Pure Amoled Black */
+            --card-bg: #0d1117;       /* Deep Cyber Charcoal */
+            --primary: #00f0ff;       /* Cyber Neon Cyan / Electric Blue */
+            --primary-hover: #00c8ff;
+            --success: #39ff14;       /* Neon Green */
+            --text-light: #ffffff;    /* Pure White */
+            --text-muted: #8b949e;    /* Cool Silver Grey */
+            --border: #21262d;        /* Sleek Dark Border */
+            --input-bg: #000000;
+            --read-only-bg: #161b22;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            padding: 6px; 
+            background: var(--bg-main); 
+            margin: 0; 
+            box-sizing: border-box; 
+            color: var(--text-light);
+            -webkit-tap-highlight-color: transparent; /* Mobile Touch Bug Fix */
+        }
+        
+        .box { 
+            background: var(--card-bg); 
+            padding: 10px; 
+            border-radius: 8px; 
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15); 
+            max-width: 400px; 
+            margin: 0 auto; 
+            width: 100%; 
+            box-sizing: border-box; 
+            border: 1px solid var(--border);
+        }
+        
+        h3 { 
+            text-align: center; 
+            color: var(--primary); 
+            margin: 0 0 8px 0; 
+            font-size: 15px; 
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 4px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+        }
+        
+        .input-group {
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .input-group label {
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .input-group input[type="text"] {
+            padding: 3px 6px;
+            font-size: 12px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            width: 75px;
+            background: var(--card-bg);
+            text-transform: uppercase;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center; 
+            box-shadow: 0 0 4px rgba(0, 240, 255, 0.2);
+        }
+
+        /* Responsive Mobile File Input Fix */
+        input[type="file"] { 
+            display: block; 
+            width: 100%; 
+            padding: 10px 6px; 
+            margin: 6px 0; 
+            border: 1px dashed var(--primary); 
+            background: rgba(0, 240, 255, 0.04); 
+            color: var(--primary);
+            font-weight: 600;
+            border-radius: 4px;
+            font-size: 12px; 
+            box-sizing: border-box;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .status { 
+            margin: 4px 0; 
+            font-weight: 600; 
+            color: var(--primary); 
+            text-align: center; 
+            font-size: 11px; 
+            background: var(--input-bg);
+            padding: 3px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .summary-container {
+            margin-top: 6px;
+            display: none; 
+        }
+        
+        .summary-vertical-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px; 
+        }
+        .summary-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .summary-field label {
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .summary-field input {
+            padding: 3px 6px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-weight: 600;
+            box-sizing: border-box;
+            width: 125px;
+            height: 26px;
+            text-align: center; 
+            background: var(--card-bg);
+            color: var(--text-light);
+        }
+
+        .user-val { 
+            border: 1px solid rgba(0, 240, 255, 0.4) !important; 
+            color: #ffffff !important;
+        }
+        .user-val:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 6px rgba(0, 240, 255, 0.4);
+        }
+        
+        /* High Visibility Date Icon */
+        input[type="date"] {
+            position: relative;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            position: absolute;
+            right: 8px;
+        }
+
+        .auto-val { 
+            color: var(--primary) !important; 
+            background-color: var(--read-only-bg) !important; 
+            border: 1px solid var(--border) !important; 
+            cursor: not-allowed;
+        }
+
+        .btn-container {
+            margin-top: 8px;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #000000;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 8px 0;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #161b22;
+            color: #484f58;
+            border: 1px solid var(--border);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .table-container { 
+            width: 100%; 
+            overflow-x: auto; 
+            margin-top: 8px; 
+            display: none; 
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid var(--border); padding: 4px; font-size: 11px; text-align: center; }
+        th { background: #161b22; color: var(--primary); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>Inward Number Taker</h3>
+    
+    <div class="input-group">
+        <label for="stationInput">Station Code</label>
+        <input type="text" id="stationInput" value="HAPA" placeholder="HAPA">
+    </div>
+
+    <input type="file" id="fileInput" accept=".csv, .xls, .xlsx, .pdf, text/csv, application/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf">
+    
+    <div id="status" class="status">File select karein...</div>
+
+    <div id="summaryWrapper" class="summary-container">
+        <div class="summary-vertical-list">
+            
+            <div class="summary-field"><label for="userRRNo">RR NO.</label><input type="text" id="userRRNo" class="user-val"></div>
+            <div class="summary-field"><label for="userRRDate">RR DATE</label><input type="date" id="userRRDate" class="user-val"></div>
+            <div class="summary-field"><label for="userFreight">FREIGHT</label><input type="number" id="userFreight" class="user-val" value="0" step="0.01"></div>
+            <div class="summary-field"><label for="userGST">GST</label><input type="number" id="userGST" class="user-val" value="0" step="0.01"></div>
+            <div class="summary-field"><label>TOTAL</label><input type="text" id="userTotal" class="auto-val" value="0.00" readonly></div>
+            <div class="summary-field"><label for="userCWT">CWT</label><input type="number" id="userCWT" class="user-val"></div>
+            
+            <div class="summary-field"><label>AWT</label><input type="text" id="userAWT" class="auto-val" readonly></div>
+            <div class="summary-field"><label>R/M/P</label><input type="text" id="outputRmp" class="auto-val" readonly></div>
+            <div class="summary-field"><label>TYPE</label><input type="text" id="outputWagonType" class="auto-val" readonly></div>
+            <div class="summary-field"><label>CMDT</label><input type="text" id="outputCmdt" class="auto-val" readonly></div>
+            <div class="summary-field"><label>STN (TO)</label><input type="text" id="outputStn" class="auto-val" readonly></div>
+            <div class="summary-field"><label>INV (Range)</label><input type="text" id="outputInv" class="auto-val" readonly></div>
+            <div class="summary-field"><label>WGN (Rows)</label><input type="text" id="outputWgn" class="auto-val" readonly></div>
+            <div class="summary-field"><label>FREE HRS.</label><input type="text" id="userFreeHrs" class="auto-val" readonly></div>
+            
+        </div>
+
+        <div class="btn-container">
+            <button type="button" id="submitBtn" class="submit-btn" onclick="submitAndSaveData()">Submit & Save</button>
+        </div>
+    </div>
+    
+    <div class="table-container" id="tableWrapper">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>SR.</th>
+                    <th>RLY</th>
+                    <th>TYPE</th>
+                    <th>WAGON NO</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9pb7v-Eix5vZLLTtI6fcs4qpLHbAFuYL4VS3caI81KJ8WsmMOZoJk0ZCseqZRoCi69A/exec";
+
+    let globalRowsData = [];
+    let filteredWagonsList = []; 
+    let generatedSttnFrom = "N/A"; 
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('userRRDate').value = `${yyyy}-${mm}-${dd}`;
+    });
+
+    document.getElementById('userFreight').addEventListener('input', calculateBillingTotal);
+    document.getElementById('userGST').addEventListener('input', calculateBillingTotal);
+
+    function calculateBillingTotal() {
+        const freight = parseFloat(document.getElementById('userFreight').value) || 0;
+        const gst = parseFloat(document.getElementById('userGST').value) || 0;
+        document.getElementById('userTotal').value = (freight + gst).toFixed(2);
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        document.getElementById('status').innerText = "Reading: " + file.name;
+        resetConsole();
+        const reader = new FileReader();
+
+        if (fileExtension === 'csv') {
+            reader.onload = function(evt) {
+                const lines = evt.target.result.split('\n');
+                globalRowsData = lines.map(line => line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+                processAndPrepareData();
+            };
+            reader.readAsText(file);
+        } else if (fileExtension === 'xls' || fileExtension === 'xlsx') {
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                globalRowsData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+                processAndPrepareData();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    });
+
+    document.getElementById('stationInput').addEventListener('input', function() {
+        if (globalRowsData.length > 0) processAndPrepareData();
+    });
+
+    function resetConsole() {
+        document.querySelector('#dataTable tbody').innerHTML = '';
+        document.getElementById('tableWrapper').style.display = 'none';
+        document.getElementById('summaryWrapper').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').innerText = "Submit & Save";
+        filteredWagonsList = [];
+    }
+
+    function processAndPrepareData() {
+        filteredWagonsList = [];
+        const filterStation = document.getElementById('stationInput').value.trim().toUpperCase();
+        let headerFound = false;
+        let stationFromIndex = -1, stationToIndex = -1, leIndex = -1, rkPmIndex = -1;       
+        let wagonTypeIndex = -1, cmdtIndex = -1, invoiceNoIndex = -1, wagonActlWtIndex = -1; 
+        let srNoIdx = -1, rlyIdx = -1, typeIdx = -1, noIdx = -1;
+
+        let finalRmpValue = "", finalWagonTypeValue = "", finalCmdtValue = "", finalStnValue = "";
+        let invoiceNumbersList = [], totalWagonsCount = 0, firstRowMatched = false, totalAwtWeight = 0; 
+
+        globalRowsData.forEach(cols => {
+            if (!cols || cols.length === 0) return;
+            const cleanCols = cols.map(c => String(c ?? '').trim().replace(/^"|"$/g, ''));
+            const firstCell = cleanCols[0];
+            if (!firstCell) return;
+
+            if (!headerFound) {
+                if (firstCell.startsWith('SR. NO.')) {
+                    stationFromIndex = cleanCols.findIndex(h => h.toUpperCase() === "STTN FROM");
+                    stationToIndex = cleanCols.findIndex(h => h.toUpperCase() === "STTN TO");
+                    leIndex = cleanCols.findIndex(h => h.toUpperCase() === "L. E.");
+                    rkPmIndex = cleanCols.findIndex(h => h.toUpperCase() === "RK PM");
+                    wagonTypeIndex = cleanCols.findIndex(h => h.toUpperCase() === "WAGON TYPE");
+                    cmdtIndex = cleanCols.findIndex(h => h.toUpperCase() === "CMDT");
+                    invoiceNoIndex = cleanCols.findIndex(h => h.toUpperCase() === "INVOICE NO.");
+                    wagonActlWtIndex = cleanCols.findIndex(h => h.toUpperCase() === "WAGON ACTL WT(T)" || h.toUpperCase() === "WAGON ACTL WT");
+                    srNoIdx = cleanCols.findIndex(h => h.toUpperCase() === "SR. NO.");
+                    rlyIdx = cleanCols.findIndex(h => h.toUpperCase() === "WAGON RLY");
+                    typeIdx = cleanCols.findIndex(h => h.toUpperCase() === "WAGON TYPE");
+                    noIdx = cleanCols.findIndex(h => h.toUpperCase() === "WAGON NO." || h.toUpperCase() === "WAGON NO");
+                    headerFound = true;
+                }
+                return; 
+            }
+
+            if (headerFound) {
+                if (leIndex !== -1 && cleanCols[leIndex] && cleanCols[leIndex].toUpperCase() !== 'L') return; 
+                let isStationMatch = filterStation === "" || 
+                    (stationFromIndex !== -1 && cleanCols[stationFromIndex].toUpperCase() === filterStation) ||
+                    (stationToIndex !== -1 && cleanCols[stationToIndex].toUpperCase() === filterStation);
+
+                if (isStationMatch) {
+                    totalWagonsCount++; 
+                    if (invoiceNoIndex !== -1 && cleanCols[invoiceNoIndex]) {
+                        let invNum = parseInt(cleanCols[invoiceNoIndex], 10);
+                        if (!isNaN(invNum)) invoiceNumbersList.push(invNum);
+                    }
+                    if (wagonActlWtIndex !== -1 && cleanCols[wagonActlWtIndex]) {
+                        let weightVal = parseFloat(cleanCols[wagonActlWtIndex]);
+                        if (!isNaN(weightVal)) totalAwtWeight += weightVal;
+                    }
+                    if (!firstRowMatched) {
+                        if (rkPmIndex !== -1 && cleanCols[rkPmIndex]) finalRmpValue = cleanCols[rkPmIndex];
+                        if (wagonTypeIndex !== -1 && cleanCols[wagonTypeIndex]) {
+                            finalWagonTypeValue = (cleanCols[wagonTypeIndex].toUpperCase() === "BCNHL") ? "BCNHL" : "BCN";
+                        }
+                        if (cmdtIndex !== -1 && cleanCols[cmdtIndex]) finalCmdtValue = cleanCols[cmdtIndex];
+                        if (stationToIndex !== -1 && cleanCols[stationToIndex]) finalStnValue = cleanCols[stationToIndex];
+                        generatedSttnFrom = cleanCols[stationFromIndex] || "N/A";
+                        firstRowMatched = true; 
+                    }
+                    filteredWagonsList.push({
+                        srNo: cleanCols[srNoIdx] || totalWagonsCount,
+                        rly: cleanCols[rlyIdx] || "",
+                        type: cleanCols[typeIdx] || "",
+                        no: cleanCols[noIdx] || ""
+                    });
+                }
+            }
+        });
+
+        let finalInvoiceRange = "N/A";
+        if (invoiceNumbersList.length > 0) {
+            let minInv = Math.min(...invoiceNumbersList), maxInv = Math.max(...invoiceNumbersList);
+            finalInvoiceRange = (minInv === maxInv) ? minInv.toString() : minInv + "-" + maxInv;
+        }
+
+        if (firstRowMatched) {
+            document.getElementById('outputRmp').value = finalRmpValue;
+            document.getElementById('outputWagonType').value = finalWagonTypeValue;
+            document.getElementById('outputCmdt').value = finalCmdtValue;
+            document.getElementById('outputStn').value = finalStnValue;
+            document.getElementById('outputInv').value = finalInvoiceRange;
+            document.getElementById('outputWgn').value = totalWagonsCount;
+            document.getElementById('userAWT').value = totalAwtWeight > 0 ? totalAwtWeight.toFixed(2) : "";
+
+            let freeHours = 0;
+            const rmpVal = finalRmpValue.trim().toUpperCase();
+            if (rmpVal === 'M') freeHours = 5;
+            else if (rmpVal === 'R') {
+                if (totalWagonsCount <= 20) freeHours = 5;
+                else if (totalWagonsCount < 31) freeHours = 7;
+                else if (totalWagonsCount < 45) freeHours = 9;
+                else freeHours = 11;
+            }
+            document.getElementById('userFreeHrs').value = freeHours;
+            document.getElementById('summaryWrapper').style.display = 'block';
+            document.getElementById('status').style.color = "var(--success)";
+            document.getElementById('status').innerText = "Data Processed.";
+        }
+    }
+
+    function convertDateToDDMMYYYY(htmlDateValue) {
+        if(!htmlDateValue) return "";
+        const parts = htmlDateValue.split('-'); 
+        return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : htmlDateValue;
+    }
+
+    function submitAndSaveData() {
+        if(filteredWagonsList.length === 0) return;
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving...";
+
+        const rawRrDate = document.getElementById('userRRDate').value;
+        const invNo = document.getElementById('outputInv').value;
+        const sttnTo = document.getElementById('outputStn').value; 
+
+        const payload = {
+            rmp: document.getElementById('outputRmp').value,
+            type: document.getElementById('outputWagonType').value,
+            cmdt: document.getElementById('outputCmdt').value,
+            stn: sttnTo, stnFrom: generatedSttnFrom, invRange: invNo,
+            wgnRows: document.getElementById('outputWgn').value,
+            rrNo: document.getElementById('userRRNo').value,
+            rrDate: convertDateToDDMMYYYY(rawRrDate),
+            cwt: document.getElementById('userCWT').value,
+            awt: document.getElementById('userAWT').value,
+            freight: document.getElementById('userFreight').value,
+            gst: document.getElementById('userGST').value,
+            total: document.getElementById('userTotal').value,
+            freeHrs: document.getElementById('userFreeHrs').value
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', 
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            const excelData = [["SR. NO.", "WAGON RLY", "WAGON TYPE", "WAGON NO"]];
+            filteredWagonsList.forEach(item => excelData.push([item.srNo, item.rly, item.type, item.no]));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(excelData), "Summary");
+            XLSX.writeFile(wb, `INV No. ${invNo} ${generatedSttnFrom} - ${sttnTo}.xlsx`);
+
+            document.getElementById('status').innerText = "SUCCESS! Saved.";
+            submitBtn.innerText = "Synced!";
+            renderWagonTable();
+        })
+        .catch(() => {
+            alert("Error!");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit & Save";
+        });
+    }
+
+    function renderWagonTable() {
+        const body = document.querySelector('#dataTable tbody');
+        body.innerHTML = ''; 
+        filteredWagonsList.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${item.srNo}</td><td>${item.rly}</td><td>${item.type}</td><td>${item.no}</td>`;
+            body.appendChild(tr);
+        });
+        document.getElementById('tableWrapper').style.display = 'block';
+    }
+</script>
+</body>
+</html>
