@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wagon Transfer Register</title>
+
+    <style>
+        :root {
+            --bg-main: #020205;       /* Deep Space Black */
+            --card-bg: rgba(13, 17, 23, 0.7); /* Transparent Cyber Charcoal for Glass Effect */
+            --primary: #00f0ff;       /* Bright Cyber Neon Cyan */
+            --primary-hover: #00c8ff;
+            --success: #39ff14;       /* Bright Neon Green */
+            --text-light: #ffffff;    /* Pure Bright White */
+            --text-muted: #a1aab5;    /* Brighter Silver Grey */
+            --border: rgba(0, 240, 255, 0.25); /* Cyan Glow Border for Glass Effect */
+            --input-bg: rgba(0, 0, 0, 0.6);   /* Dark Translucent Input Background */
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            padding: 16px 8px; 
+            background: linear-gradient(135deg, #020205 0%, #0d1117 100%); 
+            margin: 0; 
+            box-sizing: border-box; 
+            color: var(--text-light);
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        /* Glassmorphism Card Effect */
+        .box { 
+            background: var(--card-bg); 
+            padding: 16px; 
+            border-radius: 12px; 
+            backdrop-filter: blur(10px); /* Glass Blur Effect */
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 240, 255, 0.15); 
+            max-width: 420px; 
+            margin: 0 auto; 
+            width: 100%; 
+            box-sizing: border-box; 
+            border: 1px solid var(--border);
+        }
+        
+        h3 { 
+            text-align: center; 
+            color: var(--primary); 
+            margin: 0 0 16px 0; 
+            font-size: 16px; 
+            font-weight: 800;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        }
+        
+        .summary-vertical-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; 
+        }
+        .summary-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .summary-field label {
+            font-weight: 700;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* All Textboxes have exactly SAME width and Bright Cyan Text color */
+        .summary-field input {
+            padding: 4px 6px;
+            font-size: 13px;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 6px;
+            font-weight: 700;
+            box-sizing: border-box;
+            width: 155px; /* Fixed Uniform Width for all fields */
+            height: 30px;
+            text-align: center; 
+            background: rgba(13, 17, 23, 0.8);
+            color: var(--primary); /* Bright Neon Cyan for all inputs */
+            text-shadow: 0 0 4px rgba(0, 240, 255, 0.3);
+        }
+
+        .summary-field input:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+        }
+        
+        input[type="date"], input[type="time"] {
+            position: relative;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) drop-shadow(0 0 2px var(--primary));
+            cursor: pointer;
+            position: absolute;
+            right: 8px;
+        }
+
+        .status { 
+            margin: 10px 0; 
+            font-weight: 700; 
+            color: var(--primary); 
+            text-align: center; 
+            font-size: 12px; 
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        .btn-container {
+            margin-top: 14px;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #000000;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 10px 0;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            transition: all 0.2s ease;
+        }
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+        .submit-btn:disabled {
+            background: #161b22;
+            color: #484f58;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>Wagon Transfer Register</h3>
+    
+    <div id="status" class="status">Designed & Developed By : Gaurang Thakker, CGS - HAPA</div>
+
+    <div class="summary-vertical-list">
+        <div class="summary-field">
+            <label for="totalWagonsInput">NO. OF WAGONS</label>
+            <input type="text" id="totalWagonsInput" readonly placeholder="Loading..." style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field"><label for="userPlDate">PLACEMENT DATE</label><input type="date" id="userPlDate" onchange="calculateAll()"></div>
+        <div class="summary-field"><label for="userPlTime">PLACEMENT TIME</label><input type="time" id="userPlTime" onchange="calculateAll()"></div>
+        <div class="summary-field"><label for="userRlDate">RELEASE DATE</label><input type="date" id="userRlDate" onchange="calculateAll()"></div>
+        <div class="summary-field"><label for="userRlTime">RELEASE TIME</label><input type="time" id="userRlTime" onchange="calculateAll()"></div>
+        
+        <div class="summary-field">
+            <label for="freeHrsDisplay">FREE HRS.</label>
+            <input type="text" id="freeHrsDisplay" readonly placeholder="Loading..." style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field">
+            <label for="nightIncentiveDisplay">NIGHT INCENTIVE HRS</label>
+            <input type="text" id="nightIncentiveDisplay" readonly placeholder="00:00" style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field">
+            <label for="freeTimeUptoDisplay">FREE TIME UPTO</label>
+            <input type="text" id="freeTimeUptoDisplay" readonly placeholder="Calculating..." style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field">
+            <label for="detentionDisplay">DETENTION TIME</label>
+            <input type="text" id="detentionDisplay" readonly placeholder="00:00" style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field">
+            <label for="actualDemurrageDisplay">ACTUAL DEMURRAGE</label>
+            <input type="text" id="actualDemurrageDisplay" readonly placeholder="00:00" style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field">
+            <label for="roundedDemurrageDisplay">ROUNDED DEMURRAGE</label>
+            <input type="text" id="roundedDemurrageDisplay" readonly placeholder="0 Hrs" style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+
+        <div class="summary-field">
+            <label for="demurrageCostDisplay">TOTAL DEMURRAGE</label>
+            <input type="text" id="demurrageCostDisplay" readonly placeholder="₹ 0.00" style="background: #161b22; border: 1px solid rgba(0,240,255,0.2);">
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button type="button" id="submitBtn" class="submit-btn" onclick="submitAndSaveData()">Submit & Save</button>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrKSr1VV-cdrL0y8OnGWxuWHqJmzBc0qRpM4BbFLL8MFrCUVxcIUjuntX6WMoPA7Y/exec";
+    
+    let globalFreeHrs = 0;
+    let globalWagons = 0; // K2 cell se wagons lane ke liye global variable
+    let globalExpiryDT = null; 
+    let globalRoundedDemHours = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const hh = String(today.getHours()).padStart(2, '0');
+        const min = String(today.getMinutes()).padStart(2, '0');
+        
+        const formattedDate = `${yyyy}-${mm}-${dd}`;
+        const formattedTime = `${hh}:${min}`;
+
+        document.getElementById('userPlDate').value = formattedDate;
+        document.getElementById('userRlDate').value = formattedDate;
+        document.getElementById('userPlTime').value = formattedTime;
+        document.getElementById('userRlTime').value = formattedTime;
+
+        const freeHrsInput = document.getElementById('freeHrsDisplay');
+        const wagonsInput = document.getElementById('totalWagonsInput');
+        
+        // Google Sheet se W2 (freeHrs) aur K2 (noOfWagons) fetch karna
+        fetch(GOOGLE_SCRIPT_URL)
+        .then(response => response.json())
+        .then(data => {
+            // 1. Free Hours (W2) Handle karna
+            if(data.freeHrs !== undefined && data.freeHrs !== "") {
+                globalFreeHrs = parseFloat(data.freeHrs) || 0;
+                freeHrsInput.value = data.freeHrs + " Hrs";
+            } else {
+                globalFreeHrs = 0;
+                freeHrsInput.value = "0 Hrs";
+            }
+
+            // 2. No of Wagons (K2) Handle karna
+            if(data.noOfWagons !== undefined && data.noOfWagons !== "") {
+                globalWagons = parseInt(data.noOfWagons) || 0;
+                wagonsInput.value = data.noOfWagons;
+            } else {
+                globalWagons = 0;
+                wagonsInput.value = "0";
+            }
+
+            calculateAll();
+        })
+        .catch(err => {
+            console.error("Error fetching Sheet Data:", err);
+            freeHrsInput.value = "Error Loading";
+            wagonsInput.value = "Error";
+            calculateAll();
+        });
+    });
+
+    function calculateAll() {
+        calculateDetention();
+        calculateNightIncentiveAndExpiry();
+        calculateDemurrageTime();
+    }
+
+    // 1. Detention Calculation
+    function calculateDetention() {
+        const plDateVal = document.getElementById('userPlDate').value;
+        const plTimeVal = document.getElementById('userPlTime').value;
+        const rlDateVal = document.getElementById('userRlDate').value;
+        const rlTimeVal = document.getElementById('userRlTime').value;
+
+        if (!plDateVal || !plTimeVal || !rlDateVal || !rlTimeVal) {
+            document.getElementById('detentionDisplay').value = "00:00";
+            return;
+        }
+
+        const placementDT = new Date(`${plDateVal}T${plTimeVal}`);
+        const releaseDT = new Date(`${rlDateVal}T${rlTimeVal}`);
+        const diffMs = releaseDT - placementDT;
+
+        if (diffMs < 0) {
+            document.getElementById('detentionDisplay').value = "Invalid Time";
+            return;
+        }
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        document.getElementById('detentionDisplay').value = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
+    // 2. Night Incentive & Expiry Calculation
+    function calculateNightIncentiveAndExpiry() {
+        const plDateVal = document.getElementById('userPlDate').value;
+        const plTimeVal = document.getElementById('userPlTime').value;
+        const expiryInput = document.getElementById('freeTimeUptoDisplay');
+        const incentiveInput = document.getElementById('nightIncentiveDisplay');
+
+        if (!plDateVal || !plTimeVal || globalFreeHrs <= 0) {
+            expiryInput.value = "--";
+            incentiveInput.value = "00:00 Hrs";
+            globalExpiryDT = null;
+            return;
+        }
+
+        let currentDT = new Date(`${plDateVal}T${plTimeVal}`);
+        let targetFreeMinutes = globalFreeHrs * 60; 
+        let consumedFreeMinutes = 0;
+        let totalIncentiveMinutes = 0;
+
+        while (consumedFreeMinutes < targetFreeMinutes) {
+            let currentHour = currentDT.getHours();
+            let isNightHour = (currentHour >= 22 || currentHour < 6);
+
+            if (isNightHour) {
+                consumedFreeMinutes += 0.5;
+                totalIncentiveMinutes += 0.5; 
+            } else {
+                consumedFreeMinutes += 1;
+            }
+            currentDT.setMinutes(currentDT.getMinutes() + 1);
+        }
+
+        globalExpiryDT = new Date(currentDT.getTime());
+
+        const expDay = String(currentDT.getDate()).padStart(2, '0');
+        const expMonth = String(currentDT.getMonth() + 1).padStart(2, '0');
+        const expYear = currentDT.getFullYear();
+        const expHours = String(currentDT.getHours()).padStart(2, '0');
+        const expMinutes = String(currentDT.getMinutes()).padStart(2, '0');
+        expiryInput.value = `${expDay}-${expMonth}-${expYear} ${expHours}:${expMinutes}`;
+
+        const incHours = Math.floor(totalIncentiveMinutes / 60);
+        const incMinutes = Math.round(totalIncentiveMinutes % 60);
+        incentiveInput.value = `${String(incHours).padStart(2, '0')}:${String(incMinutes).padStart(2, '0')} Hrs`;
+    }
+
+    // 3. Demurrage Time Calculation
+    function calculateDemurrageTime() {
+        const rlDateVal = document.getElementById('userRlDate').value;
+        const rlTimeVal = document.getElementById('userRlTime').value;
+        const actualDemInput = document.getElementById('actualDemurrageDisplay');
+        const roundedDemInput = document.getElementById('roundedDemurrageDisplay');
+
+        if (!rlDateVal || !rlTimeVal || !globalExpiryDT) {
+            actualDemInput.value = "00:00";
+            roundedDemInput.value = "0 Hrs";
+            globalRoundedDemHours = 0;
+            calculateDemurrageCharges();
+            return;
+        }
+
+        const releaseDT = new Date(`${rlDateVal}T${rlTimeVal}`);
+        const diffMs = releaseDT - globalExpiryDT;
+
+        if (diffMs <= 0) {
+            actualDemInput.value = "00:00";
+            roundedDemInput.value = "0 Hrs";
+            globalRoundedDemHours = 0;
+            calculateDemurrageCharges();
+            return;
+        }
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        actualDemInput.value = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+        globalRoundedDemHours = hours;
+        if (minutes > 0) {
+            globalRoundedDemHours = hours + 1; 
+        }
+
+        roundedDemInput.value = `${globalRoundedDemHours} Hrs`;
+        
+        calculateDemurrageCharges();
+    }
+
+    // 4. Telescopic/Slab-wise Demurrage Cost Calculation
+    function calculateDemurrageCharges() {
+        const costDisplay = document.getElementById('demurrageCostDisplay');
+        let hoursLeft = globalRoundedDemHours;
+
+        if (globalWagons <= 0 || hoursLeft <= 0) {
+            costDisplay.value = "₹ 0.00";
+            return;
+        }
+
+        let totalCharges = 0;
+
+        // Slab 1: Upto 6 Hrs @ 150
+        if (hoursLeft > 0) {
+            let slab1Hours = Math.min(hoursLeft, 6);
+            totalCharges += slab1Hours * 150 * globalWagons;
+            hoursLeft -= slab1Hours;
+        }
+
+        // Slab 2: 7 TO 12 HRS @ 165
+        if (hoursLeft > 0) {
+            let slab2Hours = Math.min(hoursLeft, 6); 
+            totalCharges += slab2Hours * 165 * globalWagons;
+            hoursLeft -= slab2Hours;
+        }
+
+        // Slab 3: 13 TO 24 HRS @ 187.5
+        if (hoursLeft > 0) {
+            let slab3Hours = Math.min(hoursLeft, 12); 
+            totalCharges += slab3Hours * 187.5 * globalWagons;
+            hoursLeft -= slab3Hours;
+        }
+
+        // Slab 4: 25 TO 48 HRS @ 225
+        if (hoursLeft > 0) {
+            let slab4Hours = Math.min(hoursLeft, 24); 
+            totalCharges += slab4Hours * 225 * globalWagons;
+            hoursLeft -= slab4Hours;
+        }
+
+        // Slab 5: 49 TO 72 HRS @ 300
+        if (hoursLeft > 0) {
+            let slab5Hours = Math.min(hoursLeft, 24); 
+            totalCharges += slab5Hours * 300 * globalWagons;
+            hoursLeft -= slab5Hours;
+        }
+
+        // Slab 6: ABOVE 72 HRS @ 450
+        if (hoursLeft > 0) {
+            totalCharges += hoursLeft * 450 * globalWagons;
+        }
+
+        costDisplay.value = "₹ " + totalCharges.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function convertDateToDDMMYYYY(htmlDateValue) {
+        if(!htmlDateValue) return "";
+        const parts = htmlDateValue.split('-'); 
+        return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : htmlDateValue;
+    }
+
+    function submitAndSaveData() {
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('status');
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Saving...";
+    statusDiv.style.color = "var(--primary)";
+    statusDiv.innerText = "Connecting to Sheet...";
+
+    // Numerical values nikalne ke liye
+    const roundedDemurrageText = document.getElementById('roundedDemurrageDisplay').value; // "5 Hrs"
+    const roundedDemurrageValue = parseInt(roundedDemurrageText) || 0; // Sirf 5 extract hoga
+
+    const demurrageCostText = document.getElementById('demurrageCostDisplay').value; // "₹ 8,700.00"
+    // ₹ symbol aur comma hatakar sirf number nikalna
+    const demurrageCostValue = parseFloat(demurrageCostText.replace(/[^0-9.-]+/g, "")) || 0; 
+
+    const rawPlDate = document.getElementById('userPlDate').value;
+    const rawRlDate = document.getElementById('userRlDate').value;
+    const plTime = document.getElementById('userPlTime').value; 
+    const rlTime = document.getElementById('userRlTime').value; 
+
+    const payload = {
+        registerType: "WTR",
+        plDate: convertDateToDDMMYYYY(rawPlDate),
+        plTime: plTime,
+        rlDate: convertDateToDDMMYYYY(rawRlDate),
+        rlTime: rlTime,
+        roundedDemurrage: roundedDemurrageValue, // Ye X2 mein jayega
+        demurrageAmount: demurrageCostValue      // Ye Y2 mein jayega
+    };
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', 
+        cache: 'no-cache',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    
+}
+</script>
+</body>
+</html>
