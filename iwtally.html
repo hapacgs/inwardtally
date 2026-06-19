@@ -258,10 +258,20 @@
             <div class="summary-field"><label>R/M/P</label><input type="text" id="outputRmp" class="auto-val" readonly></div>
             <div class="summary-field"><label>TYPE</label><input type="text" id="outputWagonType" class="auto-val" readonly></div>
             <div class="summary-field"><label>CMDT</label><input type="text" id="outputCmdt" class="auto-val" readonly></div>
-            <div class="summary-field"><label>STN (TO)</label><input type="text" id="outputStn" class="auto-val" readonly></div>
+            <div class="summary-field"><label>STN (FROM)</label><input type="text" id="outputStn" class="auto-val" readonly></div>
             <div class="summary-field"><label>INV (Range)</label><input type="text" id="outputInv" class="auto-val" readonly></div>
             <div class="summary-field"><label>WGN (Rows)</label><input type="text" id="outputWgn" class="auto-val" readonly></div>
             <div class="summary-field"><label>FREE HRS.</label><input type="text" id="userFreeHrs" class="auto-val" readonly></div>
+            <div class="summary-field"><label for="userRakeId">RAKE ID</label><input type="text" id="userRakeId" class="user-val"></div>
+            <div class="summary-field"><label for="userPlacementDate">PLACEMENT DATE</label><input type="date" id="userPlacementDate" class="user-val"></div>
+            <div class="summary-field"><label for="userPlacementTime">PLACEMENT TIME</label><input type="time" id="userPlacementTime" class="user-val"></div>
+            <div class="summary-field"><label for="userReleaseDate">RELEASE DATE</label><input type="date" id="userReleaseDate" class="user-val"></div>
+            <div class="summary-field"><label for="userReleaseTime">RELEASE TIME</label><input type="time" id="userReleaseTime" class="user-val"></div>
+            <div class="summary-field"><label for="userDemHrs">DEMMURAGE HRS.</label><input type="number" id="userDemHrs" class="user-val" step="0.01"></div>
+            <div class="summary-field"><label for="userDemAmt">DEMMURAGE AMT.</label><input type="number" id="userDemAmt" class="user-val" step="0.01" value="0"></div>
+            <div class="summary-field"><label for="userWharfageAmt">WHARFAGE AMT.</label><input type="number" id="userWharfageAmt" class="user-val" step="0.01" value="0"></div>
+            <div class="summary-field"><label for="userShuntingHrs">SHUNTING HRS.</label><input type="number" id="userShuntingHrs" class="user-val" step="0.01"></div>
+            <div class="summary-field"><label for="userShuntingAmt">SHUNTING AMOUNT</label><input type="number" id="userShuntingAmt" class="user-val" step="0.01" value="0"></div>
             
         </div>
 
@@ -433,7 +443,7 @@
             document.getElementById('outputRmp').value = finalRmpValue;
             document.getElementById('outputWagonType').value = finalWagonTypeValue;
             document.getElementById('outputCmdt').value = finalCmdtValue;
-            document.getElementById('outputStn').value = finalStnValue;
+            document.getElementById('outputStn').value = generatedSttnFrom; // Ye file se read ki gayi 'STTN FROM' ki value set karega
             document.getElementById('outputInv').value = finalInvoiceRange;
             document.getElementById('outputWgn').value = totalWagonsCount;
             document.getElementById('userAWT').value = totalAwtWeight > 0 ? totalAwtWeight.toFixed(2) : "";
@@ -475,7 +485,7 @@
             rmp: document.getElementById('outputRmp').value,
             type: document.getElementById('outputWagonType').value,
             cmdt: document.getElementById('outputCmdt').value,
-            stn: sttnTo, 
+            stnFrom: document.getElementById('outputStn').value, // Ab ye 'stnFrom' naam se Google Script ko jayega
             stnFrom: generatedSttnFrom, 
             invRange: invNo,
             wgnRows: document.getElementById('outputWgn').value,
@@ -490,25 +500,35 @@
             wagonsList: filteredWagonsList
         };
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            // Local Excel download ka block yahan se completely hat chuka hai
-            document.getElementById('status').innerText = "SUCCESS! Saved to Sheet.";
-            submitBtn.innerText = "Synced!";
-            renderWagonTable();
-        })
-        .catch(() => {
-            alert("Error!");
-            submitBtn.disabled = false;
-            submitBtn.innerText = "Submit & Save";
-        });
+        fetch(GOOGLE_SCRIPT_URL,{
+    method:'POST',
+    headers:{
+        'Content-Type':'application/json'
+    },
+    body:JSON.stringify(payload)
+})
+.then(response => response.json())
+.then(result => {
+
+    if(result.status === "SUCCESS"){
+
+        document.getElementById("userRakeId").value =
+            result.rakeId;
+
+        document.getElementById("status").innerText =
+            "Saved Successfully : " + result.rakeId;
+
+        submitBtn.innerText = "Synced";
+
+    } else {
+        throw new Error(result.message);
     }
+
+})
+.catch(err => {
+    console.error(err);
+    alert(err.message);
+});
 
     function renderWagonTable() {
         const body = document.querySelector('#dataTable tbody');
